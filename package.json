@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "discord-eco": "0.0.10",
     "discord.js": "^11.2.1",
     "lowdb": "^1.0.0"
   }
