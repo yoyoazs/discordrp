@@ -24,7 +24,7 @@ bot.on(("ready"), ()=> {
         bot.user.setGame(jeux(), "http://twitch.tv/URL%22")     }, 5000)
 })
 
-bot.login("NDAxODk1MjEwNjc1NzMyNDkw.DTw1zA.GfbHjOX2ey0TTi3KZf1g_rolNDE");
+bot.login("process.env.TOKEN");
 
 bot.on("message", (message) => {
 
