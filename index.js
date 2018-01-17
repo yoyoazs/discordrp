@@ -4,10 +4,15 @@ modRole = 'Banquier',
 low = require('lowdb'),
 FileSync = require('lowdb/adapters/FileSync'),
 adapter = new FileSync('database.json'),
+voitureadapter = new FileSync('voiture.json'),
+db = low(adapter),
+voituredb = low(voitureadapter)
 con = console.log
 
 var bot = new Discord.Client();
 var prefix = ("/");   
+
+voituredb.defaults({ voiture: []}).write()
 
 bot.on(("ready"), ()=> {
     console.log("☻Bot démarré !!☻")
@@ -152,5 +157,59 @@ if (msg.startsWith(`${prefix}TEST`)) {
     });
 
 }
-   
+
+/////////////////////A faire avec une base de donnée
+if (message.content.startsWith(prefix + 'plaque')){
+    var plaque = message.content.substr(8);
+    if (!plaque){
+        plaque = "Indeterminé";
+    }else{
+        if (voituredb.get("voiture").find({voitureID: plaque}).value()){
+        console.log("Item trouvé")
+        var info = voituredb.get("voiture").filter({voitureID: plaque}).find("name", "marque", "couleur", "année").value();
+        var plaqueinfo = Object.values(info);
+ 
+    message.channel.sendMessage('', { embed: {
+        color: 16711680,
+        author: {
+            name: '',
+            icon_url: '',
+        },
+        title: `${message.guild.name} concessionaire`,
+        url: '',
+        fields: [
+            {
+                name: `Plauqe`,
+                value: `${plaque}`, 
+            },
+            {
+                name: 'Titulaire de la voiture',
+                value: `${plaqueinfo[1]}`, 
+            },
+            {
+                name: 'Marque de la voiture',
+                value: `${plaqueinfo[2]}`,
+            },
+            {
+                name: 'Couleur de la voiture',
+                value: `${plaqueinfo[3]}`,
+            },
+            {
+                name: 'Année de la voiture',
+                value: `${plaque[4]}`,
+            },
+        ],
+        footer: {
+            icon_url: '',
+            text: ``
+    },
+    }})
+
+}
+}
+   }
+
+   if (message.content.startsWith(prefix + 'newplaque')){
+       
+   }
 })
