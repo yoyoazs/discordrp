@@ -33,9 +33,31 @@ bot.on(("ready"), ()=> {
         bot.user.setGame(jeux(), "http://twitch.tv/URL%22")     }, 5000)
 })
 
-bot.login("process.env.TOKEN");
+bot.login(process.env.TOKEN);
 
 bot.on("message", (message) => {
+    if (message.channel.type === "dm") 
+    return;
+
+    const arg = message.content.slice(prefix.length).trim().split(/ +/g);
+
+	if(message.content.startsWith(prefix + 'say')){
+		if(message.author.id == "285345858348646400"){
+			const sayMessage = arg[1];
+			if (!sayMessage) return;
+			message.delete().catch(O_o=>{});
+			message.channel.send(sayMessage);
+			}else{
+				message.channel.send("**erreur** Tu n'est pas mon créateur")
+			}	
+	}
+		
+		if (message.content.startsWith(prefix + "ping")) {
+			message.channel.send('Pong...').then((msg) => {
+				msg.edit(`Pong! La latence est de ${msg.createdTimestamp - message.createdTimestamp}ms. La latence de l'API est de ${Math.round(bot.ping)}ms`);
+		
+		})
+	}
 
 
 
@@ -145,28 +167,28 @@ if(message.content.startsWith(prefix + "plainte")){
     })
 }
 
-if (msg.startsWith(`${prefix}PAY`)) {
+//if (msg.startsWith(`${prefix}PAY`)) {
+//
+//    if (!args[0]) {
+//        message.channel.send(`**Vous devez définir un montant. Utilisation: /PAY <montant>**`);
+//        return;
+//    }
+//
+//    if (isNaN(args[0])) {
+//        message.channel.send(`**Le montant doit être un nombre. Utilisation /PAY <montant>**`);
+//        return; 
+ //   }
+//
+//    if (message.content.includes("-")) {
+//        message.channel.sendMessage("**Vous n'avez pas le droit de vous rétiré des nombres négatif**");
+//        return;
+//    }
+//
+//    economy.updateBalance(message.author.id + message.guild.id, parseInt(-args[0])).then((i) => { 
+//        message.channel.send(`**${args[0]}$ ont étais soustrait a votre compte.**`)
+//    });
 
-    if (!args[0]) {
-        message.channel.send(`**Vous devez définir un montant. Utilisation: /TEST <montant>**`);
-        return;
-    }
-
-    if (isNaN(args[0])) {
-        message.channel.send(`**Le montant doit être un nombre. Utilisation /TEST <montant>**`);
-        return; 
-    }
-
-    if (message.content.includes("-")) {
-        message.channel.sendMessage("**Vous n'avez pas le droit de vous rétiré des nombres négatif**");
-        return;
-    }
-
-    economy.updateBalance(message.author.id + message.guild.id, parseInt(-args[0])).then((i) => { 
-        message.channel.send(`**${args[0]}$ ont étais soustrait a votre compte.**`)
-    });
-
-}
+//}
 
 if (message.content.startsWith(prefix + 'plaque')){
     var plaque = message.content.substr(8);
@@ -237,14 +259,9 @@ if (message.content.startsWith(prefix + 'plaque')){
 if (message.content.toUpperCase() === `${prefix}PAYDAY`) {
  
     economy.updateBalance(message.author.id, 500).then((i) => { // economy.updateBalance grabs the (userID, value) value being how much you want to add, and puts it into 'i'.
-        message.channel.send(`**You got $500!**\n**New Balance:** ${i.money}`);
+        message.channel.send(`**You got $100!**\n**New Balance:** ${i.money}`);
     })
 }
-    if (message.content === "$loop") { 
-      var interval = setInterval (function () {
-        bot.sendMessage(message.channel, "123")
-      }, 1 * 1000); 
-    }
 
     if (message.content.startsWith(prefix + 'newcarte')){
         var num = Math.floor((Math.random() * 9999999) + 1);
