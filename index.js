@@ -1,6 +1,10 @@
-const Discord = require("discord.js"),
+const Discord = require("discord.js");
+const talkedRecently = new Set(),
 economy = require('discord-eco'),
 modRole = 'Banquier',
+policierRole = 'Policier',
+pompierRole = 'Pompier',
+pauvreRole = 'SDF',
 low = require('lowdb'),
 FileSync = require('lowdb/adapters/FileSync'),
 adapter = new FileSync('database.json'),
@@ -167,28 +171,27 @@ if(message.content.startsWith(prefix + "plainte")){
     })
 }
 
-//if (msg.startsWith(`${prefix}PAY`)) {
-//
-//    if (!args[0]) {
-//        message.channel.send(`**Vous devez définir un montant. Utilisation: /PAY <montant>**`);
-//        return;
-//    }
-//
-//    if (isNaN(args[0])) {
-//        message.channel.send(`**Le montant doit être un nombre. Utilisation /PAY <montant>**`);
-//        return; 
- //   }
-//
-//    if (message.content.includes("-")) {
-//        message.channel.sendMessage("**Vous n'avez pas le droit de vous rétiré des nombres négatif**");
-//        return;
-//    }
-//
-//    economy.updateBalance(message.author.id + message.guild.id, parseInt(-args[0])).then((i) => { 
-//        message.channel.send(`**${args[0]}$ ont étais soustrait a votre compte.**`)
-//    });
+if (msg.startsWith(`${prefix}PAY`)) {
+    if (!args[0]) {
+        message.channel.send(`**Vous devez définir un montant. Utilisation: /PAY <montant>**`);
+        return;
+    }
 
-//}
+    if (isNaN(args[0])) {
+        message.channel.send(`**Le montant doit être un nombre. Utilisation /PAY <montant>**`);
+        return; 
+   }
+
+    if (message.content.includes("-")) {
+        message.channel.sendMessage("**Vous n'avez pas le droit de vous rajouté de l'argent**");
+        return;
+    }
+
+    economy.updateBalance(message.author.id + message.guild.id, parseInt(-args[0])).then((i) => { 
+        message.channel.send(`**${args[0]}$ ont étais soustrait a votre compte.**`)
+   });
+
+}
 
 if (message.content.startsWith(prefix + 'plaque')){
     var plaque = message.content.substr(8);
@@ -239,8 +242,12 @@ if (message.content.startsWith(prefix + 'plaque')){
    if (message.content.startsWith(prefix + 'newplaque')){
     if (!args[4]){
        return message.channel.send("Pour enregistré votre voiture veuillez faire /newplaque <plaque> <votre-speudo> <marque> <couleur> <année>\nRemplacer les espaces pas des tirés -");
-    }        
-    voituredb.get("voiture").push({voitureID : args[0], name: args[1], marque: args[2], couleur: args[3], année: args[4],}).write()
+    } 
+    let voiture = JSON.parse(fs.readFileSync("./voiture.json", "utf8"));
+    if (voiture[profilID = message.author.id]){
+        return message.channel.send("Cette plaque d'imatriculation est déja enregistré. Veuillez contacté MrFlakou ou yoyoazs si cette plaque vous appartient");
+    }
+    voituredb.get("voiture").push({profilID: message.author.id, voitureID : args[0], name: args[1], marque: args[2], couleur: args[3], année: args[4],}).write()
         message.channel.send(`Votre plaque d'immatriculation a bien étais enregistré pour la voiture de type ${args[2]}, de couleur ${args[3]}, de l'année ${args[4]}, sous le nom de ${args[1]}`)
    }
 
@@ -256,13 +263,34 @@ if (message.content.startsWith(prefix + 'plaque')){
         message.channel.send(`La voiture immatriculé ${plaqueinfo[0]}, de la marque ${plaqueinfo[2]}, de couleur ${plaqueinfo[3]} et qui date de ${plaqueinfo[4]} appartien a ${plaqueinfo[1]}. Si vous voyez se véhicule merci de nous compter au 112 ou au 15.`)
    }
 }}
-if (message.content.toUpperCase() === `${prefix}PAYDAY`) {
- 
-    economy.updateBalance(message.author.id, 500).then((i) => { // economy.updateBalance grabs the (userID, value) value being how much you want to add, and puts it into 'i'.
-        message.channel.send(`**You got $100!**\n**New Balance:** ${i.money}`);
-    })
+if (message.content.toUpperCase() === `${prefix}DAYPAY`) {
+    if (talkedRecently.has(message.author.id)) {
+        message.channel.send("Tu peut faire cette commande une fois par jours. - " + message.author);return;
+} else {
+    if (message.member.roles.find("name", modRole)){
+     economy.updateBalance(message.author.id, 200).then((i) => { // economy.updateBalance grabs the (userID, value) value being how much you want to add, and puts it into 'i'.
+    message.channel.send(`**You got $200!**\n**New Balance:** ${i.money}`);
+
+    talkedRecently.add(message.author.id);
+    setTimeout(() => {
+      talkedRecently.delete(message.author.id);
+    }, 86400000); return;
+    }
+    
+     )}
+     if (message.member.roles.find("name", pompierRole)){
+        economy.updateBalance(message.author.id, 500).then((i) => { // economy.updateBalance grabs the (userID, value) value being how much you want to add, and puts it into 'i'.
+       message.channel.send(`**You got $500!**\n**New Balance:** ${i.money}`);
+       talkedRecently.add(message.author.id);
+       setTimeout(() => {
+         talkedRecently.delete(message.author.id);
+       }, 86400000); return;
+       }
+        )}
+    }
 }
 
+ 
     if (message.content.startsWith(prefix + 'newcarte')){
         var num = Math.floor((Math.random() * 9999999) + 1);
         if (!args[6]){
@@ -324,5 +352,77 @@ if (message.content.toUpperCase() === `${prefix}PAYDAY`) {
     }
     }
        }
-    
+
+       if(message.content.startsWith(prefix + "help")){
+
+        let commande = arg[1]
+                    
+        if (!commande) {
+        (async function() {
+        
+         const mainMessage = await message.channel.send("Voici la commande Help, clique sur les différent réaction pour voir les commandes et les information!");
+        
+        await mainMessage.react("🔨");
+        await mainMessage.react("📡");
+        await mainMessage.react("💻");
+        await mainMessage.react("🎰");
+        await mainMessage.react("🎮");
+        await mainMessage.react("📻");
+        await mainMessage.react("➕");
+        await mainMessage.react("🎉");
+        await mainMessage.react("🛑");
+        
+        const panier = mainMessage.createReactionCollector((reaction, user) => user.id === message.author.id);
+         
+        panier.on('collect', async(reaction) => 
+        {
+        if (reaction.emoji.name === "🔨") {
+        
+        mainMessage.edit("Ce bot a étais créé par yoyoazs77 pour le serveur discord de FlarYonRP. Ce bot gére votre économie, enregistre votre plaque d'imatriculation et votre carte d'identité.");				
+         }
+        if (reaction.emoji.name === "📡") {
+        
+        mainMessage.edit("**La partie économie du bot contient plusieurs commandes:**\n'/money' vous permet de votre compte en banque.\n'/pay' vous permet de vous retirez de l'argent de votre compte en banque.\n'/addmoney' permet aux banquiers de rajouté ou d'enlevé de l'argent a n'importe qui.\n'/daypay' permet de recevoire votre pay du jour.");					 
+        }
+        if (reaction.emoji.name === "💻") {
+
+            mainMessage.edit("**La partie roleplay du bot contient quelques commandes:**\n'/newplaque' vous permez d'enregistrez votre plaque d'imatriculation.\n'/plaque' permet d'aquérir les informations d'une plaque d'imatriculation.\n'/alerte' permet aux policiers d'alerté les citoyens d'un vole de voitures.\n'/newcarte' permet d'enregistrez votre carte d'identité.\n'/carte' permet d'aquérir les information d'une carte d'identité.")
+        }
+        if (reaction.emoji.name === "🎰") {
+
+        mainMessage.edit("**La partie information:**\n'/site' vous permet d'avoir le lien internet du site du serveur FlarYonRP gta5.\n'/plainte' vous permet de déposser plainte.\n'/ping' vous permet de voir votre latence.")
+        }
+        if (reaction.emoji.name === "🎮") {
+            
+        mainMessage.edit("Pour avoir une information sur une commande faite /help (commande)")
+        }
+        if (reaction.emoji.name === "🛑") {
+        
+        mainMessage.delete()
+        
+         }
+        
+         await reaction.remove(message.author.id);
+        
+        });
+         }());
+         return;
+        }
+
+    if (commande === 'money') {
+        return message.channel.send("La commande '/money' est enregistré dans une database qui est lié au serveur discord cela veut dire que si vous utilisé ce bot la dans un autre serveur pour vous rajouté de l'argent cela ne changera pas sur ce serveur discord !")
+    }
+    if (commande === 'newplaque') {
+        return message.channel.send("Pour utilisé la commande '/newplaque' il vous faut indiqué les information suivante et dans le même ordres: <plaque> <votre-speudo> <marque> <couleur> <année>")
+    }
+    if (commande === 'newcarte') {
+        return message.channel.send("Pour utilisé la commande '/newcarte' il vous faut indiqué les information suivante et dans le même ordres: <nom> <prénom> <sexe(F ou M)> <née le> <ville> <taille> <nationalité> ")
+    }
+    if (commande === 'daypay') {
+        return message.channel.send("Cette commande vous permet de recevoire votre pay du jour par rapport a votre travail !")
+    }
+    if (commande ===! 'money'||'newplaque'||'newcarte'||'daypay'){
+        return message.channel.send("Cette fonctionalité fonctionne que pour les commandess 'money', 'newplaque', 'newcarte' et 'payday' d'autres commandes seront bientôt rajouté.")
+    }
+}
 })
