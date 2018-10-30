@@ -26,7 +26,7 @@ bot.on(("ready"), ()=> {
     console.log("☻Bot démarré !!☻")
     function jeux() {
         
-          var answers = ['/help', 'En développement', `Serveur RP bientôt ouvert`, `Cocréé par MrFlakou`, "Créé par yoyoazs77"];
+          var answers = ['/help', 'En développement', `Ouverture a 18h`, `Cocréé par MrFlakou`, "Créé par yoyoazs77"];
         
             return answers[Math.floor(Math.random()*answers.length)];
         }
@@ -46,8 +46,8 @@ bot.on("message", (message) => {
     const arg = message.content.slice(prefix.length).trim().split(/ +/g);
 
 	if(message.content.startsWith(prefix + 'say')){
-		if(message.author.id == "285345858348646400"){
-			const sayMessage = arg[1];
+		if(message.author.id == "285345858348646400" || message.author.id == "300403637828714516"){
+			const sayMessage = arg.join(" ");
 			if (!sayMessage) return;
 			message.delete().catch(O_o=>{});
 			message.channel.send(sayMessage);
